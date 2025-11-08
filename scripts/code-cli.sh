@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Source nvm to make node available
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+	source "$HOME/.nvm/nvm.sh"
+fi
+
 if [[ "$OSTYPE" == "darwin"* ]]; then
 	realpath() { [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"; }
 	ROOT=$(dirname $(dirname $(realpath "$0")))

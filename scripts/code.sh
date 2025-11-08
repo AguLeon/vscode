@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 
+echo "[DEBUG] Script started" >&2
+
+# Source nvm to make node available
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+	source "$HOME/.nvm/nvm.sh"
+fi
+
+echo "[DEBUG] After nvm sourcing" >&2
 set -e
+echo "[DEBUG] After set -e" >&2
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
 	realpath() { [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"; }
@@ -14,7 +23,9 @@ else
 fi
 
 function code() {
+	echo "[DEBUG] code() function called with args: $@" >&2
 	cd "$ROOT"
+	echo "[DEBUG] Changed to ROOT: $ROOT" >&2
 
 	if [[ "$OSTYPE" == "darwin"* ]]; then
 		NAME=`node -p "require('./product.json').nameLong"`
@@ -23,6 +34,7 @@ function code() {
 		NAME=`node -p "require('./product.json').applicationName"`
 		CODE=".build/electron/$NAME"
 	fi
+	echo "[DEBUG] Electron binary path: $CODE" >&2
 
 	# Get electron, compile, built-in extensions
 	if [[ -z "${VSCODE_SKIP_PRELAUNCH}" ]]; then
@@ -48,6 +60,7 @@ function code() {
 	fi
 
 	# Launch Code
+	echo "[DEBUG] About to exec: $CODE . $DISABLE_TEST_EXTENSION $@" >&2
 	exec "$CODE" . $DISABLE_TEST_EXTENSION "$@"
 }
 
@@ -76,18 +89,24 @@ function code-wsl()
 	fi
 }
 
+echo "[DEBUG] Checking environment..." >&2
 if [ "$IN_WSL" == "true" ] && [ -z "$DISPLAY" ]; then
+	echo "[DEBUG] WSL branch" >&2
 	code-wsl "$@"
 elif [ -f /mnt/wslg/versions.txt ]; then
+	echo "[DEBUG] WSLG branch" >&2
 	code --disable-gpu "$@"
 elif [ -f /.dockerenv ]; then
+	echo "[DEBUG] Docker branch - calling code function" >&2
 	# Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=1263267
 	# Chromium does not release shared memory when streaming scripts
 	# which might exhaust the available resources in the container environment
 	# leading to failed script loading.
 	code --disable-dev-shm-usage "$@"
 else
+	echo "[DEBUG] Default branch" >&2
 	code "$@"
 fi
 
+echo "[DEBUG] After code call, exit code: $?" >&2
 exit $?
