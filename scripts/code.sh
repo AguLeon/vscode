@@ -102,7 +102,7 @@ elif [ -f /.dockerenv ]; then
 	# Chromium does not release shared memory when streaming scripts
 	# which might exhaust the available resources in the container environment
 	# leading to failed script loading.
-	code --disable-dev-shm-usage "$@"
+	code --disable-dev-shm-usage --no-sandbox "$@"
 else
 	echo "[DEBUG] Default branch" >&2
 	code "$@"
