@@ -10,7 +10,7 @@ export function activate(context: vscode.ExtensionContext) {
 	};
 	log('activating extension');
 
-	// Clear any stored socket.io session data
+	// Clear any stored socket.io session data(for consistency)
 	try {
 		context.globalState.keys().forEach(key => {
 			if (key.includes('socket') || key.includes('io')) {
