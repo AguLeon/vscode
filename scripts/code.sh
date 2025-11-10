@@ -17,7 +17,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 else
 	ROOT=$(dirname "$(dirname "$(readlink -f $0)")")
 	# If the script is running in Docker using the WSL2 engine, powershell.exe won't exist
-	if grep -qi Microsoft /proc/version && type powershell.exe > /dev/null 2>&1; then
+	if grep -qi Microsoft /proc/version && type powershell.exe >/dev/null 2>&1; then
 		IN_WSL=true
 	fi
 fi
@@ -28,10 +28,10 @@ function code() {
 	echo "[DEBUG] Changed to ROOT: $ROOT" >&2
 
 	if [[ "$OSTYPE" == "darwin"* ]]; then
-		NAME=`node -p "require('./product.json').nameLong"`
+		NAME=$(node -p "require('./product.json').nameLong")
 		CODE="./.build/electron/$NAME.app/Contents/MacOS/Electron"
 	else
-		NAME=`node -p "require('./product.json').applicationName"`
+		NAME=$(node -p "require('./product.json').applicationName")
 		CODE=".build/electron/$NAME"
 	fi
 	echo "[DEBUG] Electron binary path: $CODE" >&2
@@ -64,14 +64,13 @@ function code() {
 	exec "$CODE" . $DISABLE_TEST_EXTENSION "$@"
 }
 
-function code-wsl()
-{
+function code-wsl() {
 	HOST_IP=$(echo "" | powershell.exe -noprofile -Command "& {(Get-NetIPAddress | Where-Object {\$_.InterfaceAlias -like '*WSL*' -and \$_.AddressFamily -eq 'IPv4'}).IPAddress | Write-Host -NoNewline}")
 	export DISPLAY="$HOST_IP:0"
 
 	# in a wsl shell
 	ELECTRON="$ROOT/.build/electron/Code - OSS.exe"
-	if [ -f "$ELECTRON"  ]; then
+	if [ -f "$ELECTRON" ]; then
 		local CWD=$(pwd)
 		cd $ROOT
 		export WSLENV=ELECTRON_RUN_AS_NODE/w:VSCODE_DEV/w:$WSLENV
@@ -102,7 +101,7 @@ elif [ -f /.dockerenv ]; then
 	# Chromium does not release shared memory when streaming scripts
 	# which might exhaust the available resources in the container environment
 	# leading to failed script loading.
-	code --disable-dev-shm-usage --no-sandbox "$@"
+	code --disable-dev-shm-usage --no-sandbox --disable-workspace-trust "$@"
 else
 	echo "[DEBUG] Default branch" >&2
 	code "$@"
